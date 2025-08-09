@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>CodeArena – Practice, Compete, and Learn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <!-- Firebase (compat for simplicity). Insert your config below. -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; background: #1a1a27; }
+    ::-webkit-scrollbar-thumb { background: #a259ff; border-radius: 3px; }
+    .glass { background: rgba(35,35,58,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .bg-blur { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .form-base { position: relative; z-index: 10; }
+    .cover-transition { transition: box-shadow 0.3s, background 0.3s; }
+    @media (max-width: 800px) {
+      .w-\[720px\] { width: 98vw !important; }
+      .cover-text { font-size: 1.125rem !important; } /* Larger font for mobile */
+      .cover-subtext { font-size: 0.75rem !important; }
+    }
+  </style>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>⚡</text></svg>">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#121212">
+  <meta name="description" content="CodeArena is an online coding platform with challenges, contests, and a modern learning experience.">
+</head>
+<body class="min-h-screen bg-[#121212] text-white relative">
+  <!-- Background -->
+  <div id="homepage-background" class="fixed inset-0 -z-10 transition-all duration-300">
+    <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1800&q=80" class="w-full h-full object-cover opacity-40" alt="Coding background" loading="lazy"/>
+    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-[#121212]/70 to-[#121212]"></div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-50 border-b border-white/5 bg-[#121212]/70 backdrop-blur">
+    <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded bg-gradient-to-tr from-[#a259ff] to-[#bb6eff] grid place-items-center font-black">CA</div>
+        <span class="font-semibold tracking-wide">CodeArena</span>
+      </div>
+      <ul class="hidden md:flex items-center gap-6 text-sm text-[#d7d7df]">
+        <li><a class="hover:text-white" href="#features">Features</a></li>
+        <li><a class="hover:text-white" href="#challenges">Challenges</a></li>
+        <li><a class="hover:text-white" href="#contests">Contests</a></li>
+        <li><a class="hover:text-white" href="#discuss">Discuss</a></li>
+        <li><a class="hover:text-white" href="#pricing">Pricing</a></li>
+      </ul>
+      <div id="nav-auth" class="flex items-center gap-3">
+        <button id="login-btn" class="px-3 py-1.5 rounded border border-white/10 hover:border-white/20 text-sm">Login</button>
+        <button id="signup-btn" class="px-3 py-1.5 rounded bg-gradient-to-r from-[#a259ff] to-[#bb6eff] text-sm font-semibold">Sign up</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight">
+          Practice, compete, and master coding with a modern platform
+        </h1>
+        <p class="mt-4 text-[#d7d7df] max-w-xl">Solve curated problems, join real-time contests, and track your progress with detailed insights. Built for learners and competitive programmers.</p>
+        <div class="mt-6 flex gap-3">
+          <button id="get-started-btn" class="px-5 py-3 rounded bg-gradient-to-r from-[#a259ff] to-[#bb6eff] font-semibold" aria-label="Get started with CodeArena">Get started</button>
+          <a href="#features" class="px-5 py-3 rounded border border-white/10 hover:border-white/20" aria-label="Explore features of CodeArena">Explore features</a>
+        </div>
+        <div class="mt-8 flex items-center gap-6 text-xs text-[#d7d7df]">
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live contests</div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-sky-400"></span> 1,000+ problems</div>
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-400"></span> Community discuss</div>
+        </div>
+        <!-- Demo Contest Timer -->
+        <div class="mt-6 p-4 glass rounded-xl border border-white/10 text-sm">
+          <div class="font-semibold">Next Contest Starts In:</div>
+          <div id="contest-timer" class="text-[#a259ff] text-lg font-mono">Loading...</div>
+        </div>
+      </div>
+      <div class="glass rounded-xl border border-white/10 p-5">
+        <div class="bg-[#1e1e2f] rounded-lg p-4 text-sm text-[#cfd1d8]">
+          <div class="flex items-center justify-between">
+            <span class="text-[#d7d7df]">Snippet</span>
+            <span class="px-2 py-0.5 text-xs rounded bg-black/30 border border-white/5">JavaScript</span>
+          </div>
+          <pre class="mt-3 overflow-x-auto"><code>function twoSum(nums, target) {
+  const seen = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    const complement = target - nums[i];
+    if (seen.has(complement)) return [seen.get(complement), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-16 sm:py-24 border-t border-white/5">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold">Why CodeArena?</h2>
+      <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="glass rounded-xl p-6 border border-white/10">
+          <div class="text-xl font-semibold">Curated Challenges</div>
+          <p class="mt-2 text-[#d7d7df]">From beginner to expert, practice problems designed to teach fundamentals and patterns.</p>
+        </div>
+        <div class="glass rounded-xl p-6 border border-white/10">
+          <div class="text-xl font-semibold">Real-time Contests</div>
+          <p class="mt-2 text-[#d7d7df]">Compete live with global participants and climb the leaderboard.</p>
+        </div>
+        <div class="glass rounded-xl p-6 border border-white/10">
+          <div class="text-xl font-semibold">Insightful Analytics</div>
+          <p class="mt-2 text-[#d7d7df]">Track progress, identify weak spots, and plan your next steps.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-[#d7d7df] flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded bg-gradient-to-tr from-[#a259ff] to-[#bb6eff] grid place-items-center text-xs font-black">CA</div>
+        <span>© <span id="year"></span> CodeArena</span>
+      </div>
+      <div class="flex gap-4">
+        <a href="#" class="hover:text-white">Terms</a>
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Contact</a>
+        <a href="https://github.com/codearena" class="hover:text-white" aria-label="CodeArena on GitHub">GitHub</a>
+        <a href="https://discord.gg/codearena" class="hover:text-white" aria-label="Join CodeArena on Discord">Discord</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Login Modal Overlay -->
+  <div id="login-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center transition-all duration-300">
+    <div id="modal-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-md"></div>
+    <!-- Main Auth Card -->
+    <div class="relative z-10 w-[720px] max-w-full rounded-2xl overflow-hidden shadow-2xl bg-[#23233a]/95 flex" style="height:460px;">
+      <!-- Login Form Left -->
+      <div class="form-base w-1/2 flex flex-col justify-center px-8 md:px-10 py-10">
+        <div class="mb-6">
+          <h2 class="text-3xl font-bold" style="color:#a259ff;">Welcome Back</h2>
+          <p class="mt-1 text-sm" style="color:#bbbbbb;">Sign in to CodeArena</p>
+        </div>
+        <form id="login-form" class="flex flex-col gap-4">
+          <input id="email-input" class="px-4 py-3 rounded bg-[#1e1e2f] text-white focus:outline-none focus:ring-2 ring-[#a259ff] transition-transform duration-200"
+                 type="email" placeholder="Email" aria-label="Email address" required/>
+          <input id="password-input" class="px-4 py-3 rounded bg-[#1e1e2f] text-white focus:outline-none focus:ring-2 ring-[#a259ff] transition-transform duration-200"
+                 type="password" placeholder="Password" aria-label="Password" required minlength="8"/>
+          <div class="flex items-center">
+            <input id="remember" type="checkbox" class="mr-2 accent-[#bb6eff]"/>
+            <label for="remember" class="text-xs" style="color:#aaaaaa;">Remember me</label>
+          </div>
+          <button id="email-signin-btn" type="submit"
+            class="mt-2 bg-gradient-to-r from-[#a259ff] to-[#bb6eff] text-white rounded py-2.5 font-semibold transition hover:from-[#bb6eff] hover:to-[#a259ff] shadow-md">Sign In</button>
+        </form>
+        <button id="google-signin-btn"
+          class="mt-4 w-full bg-[#f1f1f1] text-[#23233a] rounded py-2.5 transition flex items-center justify-center gap-2 font-semibold shadow hover:brightness-95">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="fill:#23233a;" viewBox="0 0 48 48">
+            <path d="M44.5 20H24v8.5h11.8C34.8 32.5 30 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12
+            c3.1 0 5.9 1.1 8 3l6-6C34.8 7.2 29.7 5 24 5 12.4 5 3 14.4 3 26s9.4 21 21 21
+            21-9.4 21-21c0-1.4-.1-2.8-.4-4z"/>
+          </svg>
+          Sign in with Google
+        </button>
+        <div class="mt-3">
+          <a href="#" class="text-xs" style="color:#bb6eff;">Forgot password?</a>
+        </div>
+      </div>
+
+      <!-- Register Form Right -->
+      <div class="form-base w-1/2 flex flex-col justify-center px-8 md:px-10 py-10 bg-gradient-to-br from-[#23233a]/90 via-[#a259ff]/10 to-[#23233a]/95 relative">
+        <div class="mb-6">
+          <span class="text-3xl font-bold" style="color:#bb6eff;">Create Account</span>
+        </div>
+        <form id="register-form" class="flex flex-col gap-4">
+          <input id="full-name-input" class="px-4 py-3 rounded bg-[#1e1e2f] text-white focus:outline-none focus:ring-2 ring-[#bb6eff] transition-transform duration-200"
+                 type="text" placeholder="Full Name" aria-label="Full name" required/>
+          <input id="reg-email-input" class="px-4 py-3 rounded bg-[#1e1e2f] text-white focus:outline-none focus:ring-2 ring-[#bb6eff] transition-transform duration-200"
+                 type="email" placeholder="Email" aria-label="Email address" required/>
+          <input id="reg-password-input" class="px-4 py-3 rounded bg-[#1e1e2f] text-white focus:outline-none focus:ring-2 ring-[#bb6eff] transition-transform duration-200"
+                 type="password" placeholder="Password" aria-label="Password" required minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Password must contain at least one number, one uppercase and lowercase letter, and at least 8 or more characters"/>
+          <input id="reg-confirm-password" class="px-4 py-3 rounded bg-[#1e1e2f] text-white focus:outline-none focus:ring-2 ring-[#bb6eff] transition-transform duration-200"
+                 type="password" placeholder="Confirm Password" aria-label="Confirm password" required/>
+          <button id="register-btn" type="submit"
+            class="mt-3 bg-gradient-to-r from-[#bb6eff] to-[#a259ff] text-white rounded py-2.5 font-semibold transition hover:from-[#a259ff] hover:to-[#bb6eff] shadow-md">Register</button>
+        </form>
+        <div class="mt-3 text-xs" style="color:#aaaaaa;">
+          By registering, you agree to our <a href="#" class="text-[#bb6eff]">Terms</a> and <a href="#" class="text-[#bb6eff]">Privacy Policy</a>.
+        </div>
+      </div>
+
+      <!-- SLIDING COVER containing image, text, switch -->
+      <div id="cover"
+           class="absolute top-0 left-1/2 w-1/2 h-full z-20 cover-transition flex flex-col items-center"
+           style="background: linear-gradient(120deg, #a259ff 0%, #bb6eff 100%); border-radius: inherit; box-shadow: 0 2px 24px 2px rgba(120,10,180,0.09);">
+        <button id="switch-btn"
+          class="absolute z-40 top-7 right-8 text-xs text-white font-bold px-5 py-2 transition
+          rounded-full bg-[#23233a80] border border-[#ffffff22] shadow"
+          style="backdrop-filter: blur(4px); box-shadow:0 2px 12px 0 #a259ff75;">
+          Register
+        </button>
+        <div class="flex-1 flex flex-col justify-center items-center px-7">
+          <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=350&q=80"
+               class="w-36 h-36 rounded-lg object-cover border-2 border-[#bb6eff] shadow-md mb-6" alt="Coding visualization"/>
+          <div class="text-center px-2">
+            <p class="cover-text text-lg text-white font-semibold drop-shadow">"Sharpen your coding skills with real-world challenges."</p>
+            <span class="cover-subtext text-[#f1f1f1]/80 text-xs block mt-1">Join CodeArena and compete globally.</span>
+          </div>
+        </div>
+        <div class="h-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Demo Contest Timer
+    function startContestTimer() {
+      const timerElement = document.getElementById('contest-timer');
+      const endTime = new Date().getTime() + (60 * 60 * 1000); // 1 hour from now (fictional)
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+        if (distance < 0) {
+          timerElement.textContent = 'Contest Started!';
+          return;
+        }
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      };
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+    startContestTimer();
+
+    // Modal Logic
+    const loginModal = document.getElementById('login-modal');
+    const homepageBackground = document.getElementById('homepage-background');
+    const openButtons = [document.getElementById('login-btn'), document.getElementById('signup-btn'), document.getElementById('get-started-btn')];
+    let coverOnRight = true;
+
+    function openModal(isRegister = false) {
+      loginModal.classList.remove('hidden');
+      homepageBackground.classList.add('filter', 'blur-md', 'brightness-50');
+      document.body.style.overflow = 'hidden';
+      coverOnRight = !isRegister;
+      setCoverPos(coverOnRight);
+    }
+
+    function closeModal() {
+      loginModal.classList.add('hidden');
+      homepageBackground.classList.remove('filter', 'blur-md', 'brightness-50');
+      document.body.style.overflow = 'auto';
+    }
+
+    openButtons.forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', () => openModal(btn.id === 'signup-btn' || btn.id === 'get-started-btn'));
+      }
+    });
+
+    document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+
+    // Cover Animation
+    const cover = document.getElementById('cover');
+    const switchBtn = document.getElementById('switch-btn');
+
+    function setCoverPos(isRight) {
+      anime({
+        targets: cover,
+        left: isRight ? '50%' : '0%',
+        easing: 'easeInOutQuart',
+        duration: 700
+      });
+      switchBtn.textContent = isRight ? 'Register' : 'Login';
+      cover.style.background = isRight
+        ? 'linear-gradient(120deg, #a259ff 0%, #bb6eff 100%)'
+        : 'linear-gradient(100deg, #bb6eff 0%, #a259ff 100%)';
+      switchBtn.style.right = '2rem';
+      switchBtn.style.left = 'auto';
+    }
+
+    switchBtn.addEventListener('click', () => {
+      coverOnRight = !coverOnRight;
+      setCoverPos(coverOnRight);
+    });
+
+    setCoverPos(true);
+
+    // Form Field Animations
+    const formInputs = document.querySelectorAll('.form-base input');
+    formInputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        anime({
+          targets: input,
+          scale: 1.02,
+          duration: 200,
+          easing: 'easeInOutQuad'
+        });
+      });
+      input.addEventListener('blur', () => {
+        anime({
+          targets: input,
+          scale: 1,
+          duration: 200,
+          easing: 'easeInOutQuad'
+        });
+      });
+    });
+
+    // ==== Auth wiring ====
+    const BACKEND_URL = "http://localhost:8050"; // Updated for production; replace with your actual URL
+    const firebaseConfig = {
+      apiKey: "AIzaSyDvLavoQHfLgClFe13RYUm8SfroXjmJk5E",
+      authDomain: "smartcodingplatform.firebaseapp.com",
+      projectId: "smartcodingplatform",
+      storageBucket: "smartcodingplatform.firebasestorage.app",
+      messagingSenderId: "118892187474",
+      appId: "1:118892187474:web:a30c8f438ccf602711b48b",
+      measurementId: "G-TVX848E9YQ"
+    };
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+    } catch (e) {
+      console.warn("Firebase init error:", e);
+    }
+
+    const auth = firebase.auth ? firebase.auth() : null;
+
+    async function registerWithBackend(idToken, displayName, email) {
+      const username = displayName || (email ? email.split('@')[0] : 'user');
+      const payload = { username, email, idToken };
+      const res = await fetch(`${BACKEND_URL}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.status === 201 || res.status === 409) {
+        return true; // created or already exists
+      }
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Signup failed with status ${res.status}`);
+    }
+
+    function persistAndRedirect(user, idToken) {
+      const profile = {
+        displayName: user.displayName || (user.email ? user.email.split('@')[0] : 'user'),
+        email: user.email || null,
+        idToken
+      };
+      localStorage.setItem('authUser', JSON.stringify(profile));
+      closeModal();
+      location.reload(); // Refresh to update navbar
+    }
+
+    // Google Sign-in
+    const googleBtn = document.getElementById('google-signin-btn');
+    if (googleBtn && auth) {
+      googleBtn.addEventListener('click', async () => {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const result = await auth.signInWithPopup(provider);
+          const idToken = await result.user.getIdToken();
+          await registerWithBackend(idToken, result.user.displayName, result.user.email);
+          persistAndRedirect(result.user, idToken);
+        } catch (err) {
+          alert(`Google sign-in failed: ${err.message || err}`);
+        }
+      });
+    }
+
+    // Email Sign-in
+    const loginForm = document.getElementById('login-form');
+    if (loginForm && auth) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email-input').value.trim();
+        const password = document.getElementById('password-input').value;
+        if (!email || !password) {
+          alert('Please enter email and password');
+          return;
+        }
+        try {
+          const result = await auth.signInWithEmailAndPassword(email, password);
+          const idToken = await result.user.getIdToken();
+          await registerWithBackend(idToken, result.user.displayName, result.user.email);
+          persistAndRedirect(result.user, idToken);
+        } catch (err) {
+          alert(`Email sign-in failed: ${err.message || err}`);
+        }
+      });
+    }
+
+    // Register
+    const registerForm = document.getElementById('register-form');
+    if (registerForm && auth) {
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('full-name-input').value.trim();
+        const email = document.getElementById('reg-email-input').value.trim();
+        const password = document.getElementById('reg-password-input').value;
+        const confirmPassword = document.getElementById('reg-confirm-password').value;
+        if (password !== confirmPassword) {
+          alert('Passwords do not match');
+          return;
+        }
+        try {
+          const result = await auth.createUserWithEmailAndPassword(email, password);
+          await result.user.updateProfile({ displayName: fullName });
+          await result.user.sendEmailVerification(); // Added email verification
+          const idToken = await result.user.getIdToken();
+          await registerWithBackend(idToken, fullName, email);
+          persistAndRedirect(result.user, idToken);
+        } catch (err) {
+          alert(`Registration failed: ${err.message || err}`);
+        }
+      });
+    }
+
+    // Swap navbar auth UI if logged in
+    try {
+      const navAuth = document.getElementById('nav-auth');
+      const stored = localStorage.getItem('authUser');
+      if (navAuth && stored) {
+        const user = JSON.parse(stored);
+        const name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+        navAuth.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:block text-sm text-[#d7d7df]">Hi, <span class="font-semibold text-white">${name}</span></div>
+            <button id="logout-btn" class="px-3 py-1.5 rounded border border-white/10 hover:border-white/20 text-sm">Logout</button>
+          </div>
+        `;
+        const logoutBtn = document.getElementById('logout-btn');
+        logoutBtn?.addEventListener('click', () => {
+          localStorage.removeItem('authUser');
+          location.reload();
+        });
+      }
+    } catch (e) { /* no-op */ }
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 # backend/models.py
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from datetime import datetime
 
@@ -15,4 +15,4 @@ class UserInDB(BaseModel):
     email: EmailStr
     role: str = "student"
     created_at: datetime
-    submissions: Optional[List[str]] = []
+    submissions: Optional[List[str]] = Field(default_factory=list)
